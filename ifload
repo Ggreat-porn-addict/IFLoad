@@ -1,0 +1,2 @@
+#!/bin/sh
+python3.6 IFLoad_0.4.py $1
