@@ -1,22 +1,23 @@
-### ImageFap Gallery Downloader
-### General purpose download function
+"""ImageFap Gallery Downloader
+General purpose download function."""
 
 from os import path, makedirs
-import request
-import time
+from request import Request
+from time import sleep
 
-def DownloadImage(url,Dir,attempts=3):
-    success = 0
+def DownloadImage(config,url,Dir,attempts=3):
+    success = False
+    r = Request(config)
     for k in range(attempts):
-        pic = request.ReqUrl(url)
-        if (pic!=[]):
-            success = 1
+        pic = r.ReqUrl(url)
+        if pic is not None and pic!=[]:
+            success = True
             break
         else:
-            time.sleep(1)
+            sleep(1)
 
     if success:    
-        ### create output directory if it doesn't exist
+        """create output directory if it doesn't exist"""
         if not path.exists(Dir):
             makedirs(Dir)
         i=0
@@ -29,10 +30,10 @@ def DownloadImage(url,Dir,attempts=3):
         _path = Dir+'/'+fname
 
         while True:
-            ### check if file already exists, in which case progressing numbers are added to the new filename to avoid overwriting of older files.
+            """check if file already exists, in which case progressing numbers are added to the new filename to avoid overwriting of older files."""
             pic_num = 0
             if not pic:
-                return 0 
+                return False
 
             if not path.exists(_path):
                 f = open(_path,'wb')
@@ -46,6 +47,6 @@ def DownloadImage(url,Dir,attempts=3):
                 ext = fname[k:]
                 fname = fn1+str(pic_num)+ext
                 _path = Dir+'/'+fname
-        return 1
+        return True
     else:
-        return 0
+        return False

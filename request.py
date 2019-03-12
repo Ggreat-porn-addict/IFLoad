@@ -1,24 +1,29 @@
-### ImageFap Gallery Downloader
-### request url content
+"""ImageFap Gallery Downloader
+request url content."""
 
-import config
-import urllib.request
-    
-def ReqUrl(urlstr, encoding=None):
-    if (urlstr[:8] != "https://"): urlstr="https://"+urlstr
-    req = urllib.request.Request(urlstr)
-    ### spoof user-agent and try to appear as mozilla firefox
-    req.add_header('User-Agent', config.useragent)
-    opnr = urllib.request.build_opener()
-    ### Request contents of url
-    try:
-        dat = opnr.open(req).read()
-    except Exception as E:
-        print("Exception: ", urlstr, str(E))
-        return
-#        dat = []
-    if encoding:
-        return dat.decode(encoding)
-    else:
-        return dat
+from urllib import request as rq
+
+class Request:    
+    def __init__(self, config):
+        self._configKey = 'common'
+        self._config = config
+
+
+    def ReqUrl(self, urlstr, encoding=None, proto='https://'):
+        if not urlstr.startswith('https://') and \
+           not urlstr.startswith('http://'): urlstr=proto+urlstr
+        req = rq.Request(urlstr)
+        ### spoof user-agent and try to appear as mozilla firefox
+        req.add_header('User-Agent', self._config[self._configKey]['useragent'])
+        opnr = rq.build_opener()
+        ### Request contents of url
+        try:
+            dat = opnr.open(req).read()
+        except Exception as E:
+            print("Exception: ", urlstr, str(E))
+            return
+        if encoding:
+            return dat.decode(encoding)
+        else:
+            return dat
 

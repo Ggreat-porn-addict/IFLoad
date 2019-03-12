@@ -1,0 +1,6 @@
+python==3.6
+# Newer versions proven to be buggy: pyppeteer sessions frequently closed.
+websockets==6.0
+yaml
+pyppeteer==0.0.21
+requests-html

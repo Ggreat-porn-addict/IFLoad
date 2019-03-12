@@ -1,91 +1,105 @@
-### ImageFap Gallery Downloader
-### download queue management
+"""ImageFap Gallery Downloader
+download queue management."""
 
-import config
-import IFUser
-#from Tkinter import Tk
 from shelve import open as dbmopen
+from time import time
+from json import loads
 
-queue = []
 
-def CheckUrl(url):
-    ### check if url looks like a gallery url
-    if (url.find(config.GalleryLink1)!=-1):
-        return 1 #IF1
-    elif (url.find(config.GalleryLink2)!=-1):
-        return 2 #IF2
-    elif (url.find(config.GalleryLink3)!=-1):
-        return 3 #XH
-    elif (url.find(config.GalleryLink4)!=-1):
-        return 4 #IF3
-    elif (url.find(config.IFFolder1)!=-1):
-        return 5 #IFFolder1
-    elif (url.find(config.IFFolder2)!=-1):
-        return 6 #IFFolder2
-    elif (url.find(config.IFUserLink)!=-1):
-        return 7 #IFUser
-    else:
-        return 0
+plugins = []
 
-def PollClipboard():
-    ### retrieve the current clipboard content
-    clipb = []
-    maxk = config.stamp[0]
-    with dbmopen(config.clipboard, 'r') as clip:
-        for k in clip:
-            t = int(k) 
-            if t > config.stamp[0]:
-                clipb.append(clip[k])
-                if t > maxk:
-                    maxk = t
-        config.stamp[0] = maxk
-#    try:
-#        clip = Tk()
-#        clip.withdraw()
-#        clipb = clip.clipboard_get()
-#        clip.destroy()
-#    except:
-#        clipb = ''
-    return clipb
 
-def AddToQueue(url,urltype,destination_folder):
-    global queue
-    queue+=[[url,urltype,destination_folder]]
+def plugin(p):
+    if p not in plugins:
+        plugins.append(p)
 
-def RemoveFromQueue():
-    global queue
-    queue.remove(queue[0])
 
-def AddFolder(FolderUrl):
-    UserName, FolderName, Galleries = IFUser.ListFolderGalleries(FolderUrl)
-    for Gal in Galleries:
-        AddToQueue(Gal,4,config.MainDirectory+"/"+config.UserDirectory+"/"+UserName+"/"+FolderName)
+class UrlQueue:
 
-def enqeue(url):    
-        urltype = CheckUrl(url)
-        if urltype:
-            if urltype<5:
-                ### add url to queue
-                if urltype==3:
-                    AddToQueue(url,urltype,config.MainDirectory+"/xHamster")
-                else:
-                    AddToQueue(url,urltype,config.MainDirectory+"/ImageFap")
-            elif urltype<7:
-                AddFolder(url)
-            elif urltype==7:
-                Username, Folders = IFUser.ListUserFolders(url)
-                for Folder in Folders:
-                    AddFolder(Folder[1])
+    def __init__(self, config):
+        self._configKey = 'common'
+        self._stamp = int(time()) 
+        self._cnf = config
+        self._config = config.get()
+        self._queue = []
+#        self._last_clipboard = ''
 
-def CheckClipboard():
-    ### check if clipboard content has changed
-    ### check if the new content is a valid url and add to queue
-#    global last_clipboard
+
+    def getPlugin(self):
+        return self._queue[0][0]
+
+
+    def getUrl(self):
+        return self._queue[0][1]
+
+
+    def getUrlType(self):
+        return self._queue[0][2]
+
+
+    def getDestinationFolder(self):
+        return self._queue[0][3]
+
+
+    def Dispatch(self):
+        if len(self._queue):
+            self.getPlugin().DownloadGallery(self)
+
+
+    def PollClipboard(self):
+        """Retrieve the current clipboard content"""
+        clipb = []
+        maxk = self._stamp
+        with dbmopen(self._config[self._configKey]['clipboard'], 'r') as clip:
+            for k in clip:
+                t = int(k) 
+                if t > self._stamp:
+                    entry = loads(clip[k])
+                    if entry['type'] == 'picture':
+                        clipb.append(entry['url'])
+                    if t > maxk:
+                        maxk = t
+            self._stamp = maxk
+        return clipb
+
+
+    def PollClipboardTk(self): 
+        try:
+            from Tkinter import Tk
+            clip = Tk()
+            clip.withdraw()
+            clipb = [ clip.clipboard_get() ]
+            clip.destroy()
+        except:
+            clipb = [] 
+        return clipb
+
+
+    def AddToQueue(self,plugin, url,urltype,destination_folder):
+        self._queue+=[[plugin,url,urltype,destination_folder]]
+
+
+    def RemoveFromQueue(self):
+        self._queue.remove(self._queue[0])
+
+
+    def enqeue(self,url):    
+        for p in plugins:
+            plugin = p(self._cnf)
+            urltype = plugin.Detect(url)
+            if urltype:
+                plugin.enqueue(self, url, urltype)
+                break
+
+
+    def CheckClipboard(self):
+        """ Check if clipboard content has changed.
+        Check if the new content is a valid url and add to queue."""
     
-#    clipboard = PollClipboard()
+#        clipboard = PollClipboard()
             
-#    if (clipboard!=last_clipboard):
-#        last_clipboard=clipboard
-    for clipboard in PollClipboard():
-        enqeue(clipboard)        
-#last_clipboard = PollClipboard()
+#        if (clipboard!=self._last_clipboard):
+#            self._last_clipboard=clipboard
+        for clipboard in self.PollClipboard():
+            self.enqeue(clipboard)
+#    self._last_clipboard = PollClipboard()

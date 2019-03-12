@@ -1,6 +1,9 @@
-ImageFap Gallery Downloader
+# ImageFap Gallery Downloader
 
-Usage: 
+Original source stolen from:
+https://sourceforge.net/projects/imagefap-gallery-downloader/files/
+
+## Usage: 
 Launch the .py script (or .exe if you are using the "compiled" version) 
 and let it run in the background. When you copy the gallery link to the 
 clipboard, the download will start automatically. The default download 
@@ -17,7 +20,7 @@ The main download directory can be specified in "IFLoad.config" by
 setting MainDirectory="path to directory".
 
 
-Version history:
+##Version history:
 
 v0.4 - 11/15/2015
 
@@ -72,7 +75,7 @@ the url is copied to the clipboard.
 gallery url must be of the format
 _http://www.imagefap.com/gallery.php?gid=<gallery id number>_
 
-known bugs:
+## known bugs:
 - downloader will crash with a TclError when clipboard is empty
 - download of a gallery will not start if the url has been copied 
 to the clipboard prior to the execution of the downloader
