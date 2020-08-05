@@ -4,7 +4,10 @@ common:
     UserDirectory: "UserGalleries"
 
 xHamster:
+#    GalleryLink: "xhamster.sitescrack.host/photos/gallery/"
+#    GalleryLink: "kinporn.com/photos/gallery/"
     GalleryLink: "xhamster.com/photos/gallery/"
+
 
 ImageFap:
     baseurl: "www.imagefap.com"
@@ -35,4 +38,6 @@ ErobankSu:
     baseurl: 'erobank.su'
     GalleryLink: 'erobank.su'
 
-
+GesekNet:
+    GalleryLink: 'gesek.net/album/'
+    BaseUrl: 'http://www.gesek.net/'

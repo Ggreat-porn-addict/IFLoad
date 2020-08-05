@@ -1,5 +1,5 @@
 from os import path
-from yaml import load
+from yaml import safe_load as load
 
 """ImageFap Gallery Downloader configuration."""
 

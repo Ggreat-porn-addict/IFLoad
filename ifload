@@ -1,2 +1,2 @@
 #!/bin/sh
-python3.6 IFLoad.py $1
+python3 IFLoad.py $1
